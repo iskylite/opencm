@@ -18,7 +18,7 @@ import (
 const UnknownTargetType = "UNKNOWN"
 
 // updateTargetState targetType即为lustre存储目标类型，这里用于指定实际目录，即mdt、obdfilter
-func (l *lustreCollector) updateTargetState(targetType string, ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateTargetState(targetType string, ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(procFilePath(filepath.Join("fs/lustre", targetType, "*")))
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func (l *lustreCollector) updateTargetState(targetType string, ch chan<- *transp
 	}
 
 	for _, fp := range fps {
-		numExports, err := readAll(filepath.Join(fp, "num_exports"))
+		numExports, err := utils.ReadAll(filepath.Join(fp, "num_exports"))
 		if err != nil {
 			return err
 		}
@@ -48,7 +48,7 @@ func (l *lustreCollector) updateTargetState(targetType string, ch chan<- *transp
 			tags["label"] = filepath.Base(fp)
 			// tags["num_exports"] = strings.TrimSpace(string(numExports))
 
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        utils.Now(),
 				Measurement: "lustre_target_state",
 				Tags:        tags,
@@ -102,7 +102,7 @@ func (l *lustreCollector) parseRecoveryStatus(reader io.Reader, handler func(map
 }
 
 // lustre 存储目标卷数据采集
-func (l *lustreCollector) updateTargetSize(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateTargetSize(ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(filepath.Join(l.targetSizePath, "osd-*/*/mntdev"))
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func (l *lustreCollector) updateTargetSize(ch chan<- *transport.Data) error {
 		}
 		// 存储卷类型，设备名和存储硬盘类型
 		for _, tKey := range []string{"fstype", "mntdev", "nonrotational"} {
-			tval, err := readAll(filepath.Join(fpDir, tKey))
+			tval, err := utils.ReadAll(filepath.Join(fpDir, tKey))
 			if err != nil {
 				return err
 			}
@@ -139,7 +139,7 @@ func (l *lustreCollector) updateTargetSize(ch chan<- *transport.Data) error {
 		// 存储卷容量
 		fields := make(map[string]float64, 5)
 		for _, fKey := range []string{"filesfree", "filestotal", "kbytesavail", "kbytestotal", "kbytesfree"} {
-			fdata, err := readAll(filepath.Join(fpDir, fKey))
+			fdata, err := utils.ReadAll(filepath.Join(fpDir, fKey))
 			if err != nil {
 				return err
 			}
@@ -149,7 +149,7 @@ func (l *lustreCollector) updateTargetSize(ch chan<- *transport.Data) error {
 			}
 			fields[fKey] = float64(fdataint64)
 		}
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        utils.Now(),
 			Measurement: "lustre_target_size",
 			Tags:        tags,
@@ -167,7 +167,7 @@ func (l *lustreCollector) parseTargetLabel(label string) string {
 }
 
 // lustre job_stats采集
-func (l *lustreCollector) updateTargetJobStats(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateTargetJobStats(ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(procFilePath("fs/lustre/*/*/job_stats"))
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func (l *lustreCollector) updateTargetJobStats(ch chan<- *transport.Data) error 
 		fsname := l.parseLustreTarget(target)
 		targetType := l.parseTargetLabel(target)
 
-		jobStatsDataBytes, err := readAll(fp)
+		jobStatsDataBytes, err := utils.ReadAll(fp)
 		if err != nil {
 			return err
 		}
@@ -195,7 +195,7 @@ func (l *lustreCollector) updateTargetJobStats(ch chan<- *transport.Data) error 
 			return err
 		}
 		err = l.parseJobStatsData(jobStatsData["job_stats"], func(rtime int64, jobID string, fields map[string]float64) {
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_" + strings.ToLower(targetType) + "_job_stats",
 				Tags: map[string]string{
@@ -264,7 +264,7 @@ func (l *lustreCollector) parseJobStatsData(jobStatsData []map[string]interface{
 }
 
 // lustre配额信息采集
-func (l *lustreCollector) updateTargetQuotaSlave(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateTargetQuotaSlave(ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(procFilePath("fs/lustre/*/*/quota_slave/acct_*"))
 	if err != nil {
 		return err
@@ -291,7 +291,7 @@ func (l *lustreCollector) updateTargetQuotaSlave(ch chan<- *transport.Data) erro
 		}
 		rtime := utils.Now()
 
-		quotaSlaveDataBytes, err := readAll(fp)
+		quotaSlaveDataBytes, err := utils.ReadAll(fp)
 		if err != nil {
 			return err
 		}
@@ -305,7 +305,7 @@ func (l *lustreCollector) updateTargetQuotaSlave(ch chan<- *transport.Data) erro
 			return err
 		}
 		err = l.parseQuotaSlaveData(quotaSlaveData[yamlGroup], func(id string, fields map[string]float64) {
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_" + acctFileName,
 				Tags: map[string]string{

@@ -72,7 +72,7 @@ func NewFibreChannelCollector(logger log.Logger, subsystem string) (Collector, e
 	return &i, nil
 }
 
-func (c *fibrechannelCollector) Update(ch chan<- *transport.Data) error {
+func (c *fibrechannelCollector) Update(ch chan<- *transport.CollectData) error {
 	rtime := utils.Now()
 	hosts, err := c.fs.FibreChannelClass()
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *fibrechannelCollector) Update(ch chan<- *transport.Data) error {
 
 		// 错误统计
 		fields := newFibreChannelFields(host)
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        tags,

@@ -41,7 +41,7 @@ func (c *zfsCollector) openProcFile(path string) (*os.File, error) {
 	return file, nil
 }
 
-// func (c *zfsCollector) updateZfsStats(subsystem string, ch chan<- *transport.Data) error {
+// func (c *zfsCollector) updateZfsStats(subsystem string, ch chan<- *transport.CollectData) error {
 // 	file, err := c.openProcFile(filepath.Join(c.linuxProcpathBase, c.linuxPathMap[subsystem]))
 // 	if err != nil {
 // 		return err
@@ -53,7 +53,7 @@ func (c *zfsCollector) openProcFile(path string) (*os.File, error) {
 // 	})
 // }
 
-func (c *zfsCollector) updatePoolStats(ch chan<- *transport.Data) error {
+func (c *zfsCollector) updatePoolStats(ch chan<- *transport.CollectData) error {
 	// IO 统计
 	zpoolPaths, err := filepath.Glob(procFilePath(filepath.Join(c.linuxProcpathBase, c.linuxZpoolIoPath)))
 	if err != nil {

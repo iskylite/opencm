@@ -29,7 +29,7 @@ func NewMeminfoCollector(logger log.Logger, subsystem string) (Collector, error)
 
 // Update calls (*meminfoCollector).getMemInfo to get the platform specific
 // memory metrics.
-func (c *meminfoCollector) Update(ch chan<- *transport.Data) error {
+func (c *meminfoCollector) Update(ch chan<- *transport.CollectData) error {
 	rtime := utils.Now()
 	memInfo, err := c.getMemInfo()
 	if err != nil {
@@ -37,7 +37,7 @@ func (c *meminfoCollector) Update(ch chan<- *transport.Data) error {
 	}
 	level.Debug(c.logger).Log("msg", "Set node_mem", "memInfo", memInfo)
 
-	ch <- &transport.Data{
+	ch <- &transport.CollectData{
 		Time:        rtime,
 		Measurement: c.subsystem,
 		Tags:        nil,

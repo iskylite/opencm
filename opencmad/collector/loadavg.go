@@ -27,13 +27,13 @@ func NewLoadavgCollector(logger log.Logger, subsystem string) (Collector, error)
 	}, nil
 }
 
-func (c *loadavgCollector) Update(ch chan<- *transport.Data) error {
+func (c *loadavgCollector) Update(ch chan<- *transport.CollectData) error {
 	rtime := utils.Now()
 	loads, err := getLoad()
 	if err != nil {
 		return fmt.Errorf("couldn't get load: %w", err)
 	}
-	ch <- &transport.Data{
+	ch <- &transport.CollectData{
 		Time:        rtime,
 		Measurement: c.subsystem,
 		Tags:        nil,

@@ -2,7 +2,6 @@ package collector
 
 import (
 	"errors"
-	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -63,7 +62,7 @@ func NewLustreCollector(logger log.Logger, subsystem string) (Collector, error) 
 	}, nil
 }
 
-func (l *lustreCollector) Update(ch chan<- *transport.Data) error {
+func (l *lustreCollector) Update(ch chan<- *transport.CollectData) error {
 	if _, err := l.openProcFile(l.healthCheckPath); err != nil {
 		if err == errLustreNotAvailable {
 			level.Debug(l.logger).Log("err", err)
@@ -72,7 +71,7 @@ func (l *lustreCollector) Update(ch chan<- *transport.Data) error {
 	}
 	// updateLliteStats、updateOSTStats、updateLnetStats 采集0.5s内的数据并做处理，近似瞬时值
 	// updateTargetJobStats 暂时不做修改
-	updateFuncs := []func(chan<- *transport.Data) error{
+	updateFuncs := []func(chan<- *transport.CollectData) error{
 		l.updateLustreHealth,
 		l.updateMGTState,
 		l.updateMDTState,
@@ -92,7 +91,7 @@ func (l *lustreCollector) Update(ch chan<- *transport.Data) error {
 	var wg sync.WaitGroup
 	wg.Add(len(updateFuncs))
 	for _, updateFunc := range updateFuncs {
-		go func(updateFunc func(chan<- *transport.Data) error) {
+		go func(updateFunc func(chan<- *transport.CollectData) error) {
 			if err := updateFunc(ch); err != nil {
 				level.Debug(l.logger).Log("msg", err, "subcollector", runtime.FuncForPC(reflect.ValueOf(updateFunc).Pointer()).Name())
 			}
@@ -113,12 +112,12 @@ func (l *lustreCollector) openProcFile(path string) (*os.File, error) {
 	return file, nil
 }
 
-func (l *lustreCollector) updateLustreHealth(ch chan<- *transport.Data) error {
-	healthCheck, err := readAll(filepath.Join(l.healthCheckPath, "health_check"))
+func (l *lustreCollector) updateLustreHealth(ch chan<- *transport.CollectData) error {
+	healthCheck, err := utils.ReadAll(filepath.Join(l.healthCheckPath, "health_check"))
 	if err != nil {
 		return err
 	}
-	version, err := readAll(sysFilePath("fs/lustre/version"))
+	version, err := utils.ReadAll(sysFilePath("fs/lustre/version"))
 	if err != nil {
 		return err
 	}
@@ -128,7 +127,7 @@ func (l *lustreCollector) updateLustreHealth(ch chan<- *transport.Data) error {
 	}
 	fields := make(map[string]float64, 3)
 	for _, key := range []string{"max_dirty_mb", "memused", "memused_max"} {
-		data, err := readAll(sysFilePath("fs/lustre/" + key))
+		data, err := utils.ReadAll(sysFilePath("fs/lustre/" + key))
 		if err != nil {
 			fields[key] = 0.0
 			level.Debug(l.logger).Log("msg", err)
@@ -142,24 +141,11 @@ func (l *lustreCollector) updateLustreHealth(ch chan<- *transport.Data) error {
 		}
 		fields[key] = float64(fdata)
 	}
-	ch <- &transport.Data{
+	ch <- &transport.CollectData{
 		Time:        utils.Now(),
 		Measurement: "lustre_health",
 		Tags:        tags,
 		Fields:      fields,
 	}
 	return nil
-}
-
-func readAll(file string) ([]byte, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	data, err := io.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
 }

@@ -14,9 +14,9 @@ import (
 	"github.com/iskylite/opencm/transport"
 )
 
-func (l *lustreCollector) updateLnetMemUsed(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateLnetMemUsed(ch chan<- *transport.CollectData) error {
 	fp := filepath.Join(l.lnetPath, "lnet_memused")
-	lnetMemUsedByte, err := readAll(fp)
+	lnetMemUsedByte, err := utils.ReadAll(fp)
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func (l *lustreCollector) updateLnetMemUsed(ch chan<- *transport.Data) error {
 	if err != nil {
 		return err
 	}
-	ch <- &transport.Data{
+	ch <- &transport.CollectData{
 		Time:        utils.Now(),
 		Measurement: "lustre_lnet_memused",
 		Fields: map[string]float64{
@@ -34,14 +34,14 @@ func (l *lustreCollector) updateLnetMemUsed(ch chan<- *transport.Data) error {
 	return nil
 }
 
-func (l *lustreCollector) updateLnetNis(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateLnetNis(ch chan<- *transport.CollectData) error {
 	fp := filepath.Join(l.lnetPath, "nis")
 	lnetNisFile, err := os.Open(fp)
 	if err != nil {
 		return err
 	}
 	err = l.parseLnetNisFile(lnetNisFile, func(nid, state string) {
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        utils.Now(),
 			Measurement: "lustre_nis_state",
 			Tags: map[string]string{
@@ -69,7 +69,7 @@ func (l *lustreCollector) parseLnetNisFile(reader io.Reader, handler func(string
 	return scanner.Err()
 }
 
-func (l *lustreCollector) updateLnetStats(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateLnetStats(ch chan<- *transport.CollectData) error {
 	fp := filepath.Join(l.lnetPath, "stats")
 	// 第一次采集信息
 	lnetStatsFile, err := os.Open(fp)
@@ -115,7 +115,7 @@ func (l *lustreCollector) updateLnetStats(ch chan<- *transport.Data) error {
 			"route_bytes": float64(lData[9]),
 			"drop_bytes":  float64(lData[10]),
 		}
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        lTime.Local().Unix(),
 			Measurement: "lustre_lnet_stats",
 			Tags:        nil,

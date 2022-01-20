@@ -76,7 +76,7 @@ func NewFilesystemCollector(logger log.Logger, subsystem string) (Collector, err
 	}, nil
 }
 
-func (c *filesystemCollector) Update(ch chan<- *transport.Data) error {
+func (c *filesystemCollector) Update(ch chan<- *transport.CollectData) error {
 	rtime := utils.Now()
 	stats, err := c.GetStats()
 	if err != nil {
@@ -108,7 +108,7 @@ func (c *filesystemCollector) Update(ch chan<- *transport.Data) error {
 			fields["files_percent"] = (s.files - s.filesFree) / s.files
 			fields["ro"] = s.ro
 		}
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        tags,

@@ -73,13 +73,13 @@ func NewProcessStatCollector(logger log.Logger, subsystem string) (Collector, er
 		logger:                   logger,
 	}, nil
 }
-func (c *processCollector) Update(ch chan<- *transport.Data) error {
+func (c *processCollector) Update(ch chan<- *transport.CollectData) error {
 	slurmstepdProcStats, allProcessesStats, rtime, err := c.getAllProcs()
 	if err != nil {
 		return err
 	}
 	err = c.parseProcesses(slurmstepdProcStats, allProcessesStats, func(stat *procStat, jobid string) {
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        stat.tags(),

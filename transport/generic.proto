@@ -1,0 +1,12 @@
+// 通用数据模块
+syntax = "proto3";
+
+package transport;
+
+option go_package = "transport/";
+
+// GenericNode 通用数据
+message GenericNode { string Node = 1; }
+
+// GenericMsg 通用消息
+message GenericMsg { string Msg = 1; }

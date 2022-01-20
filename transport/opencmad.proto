@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+import "transport/generic.proto";
+
+package transport;
+
+option go_package = "transport/";
+
+service OpenCMADService {
+  rpc Collect(CollectRequest) returns (CollectResponse);
+  rpc Ping(GenericNode) returns (GenericMsg);
+}
+
+// Request opencmad数据采集请求数据
+message CollectRequest {
+  repeated string PullNodes = 1; // 数据拉取节点列表，包括源节点和中间节点
+}
+
+// CollectResponse opencmad数据采集响应数据
+message CollectResponse {
+  string NodeName = 1; // tag，主机名
+  string NodeType = 2; // tag，主机类型
+  repeated string PullNodes = 3; // 数据拉取节点列表，包括源节点和中间节点
+  repeated CollectData CollectDatas = 4; // 传递数据
+}
+
+// CollectData opencmad数据采集通用数据存储格式
+message CollectData {
+  int64 Time = 1;                 // 时间
+  string Measurement = 2;         // influxdb中的数据表名
+  map<string, string> Tags = 3;   // influxdb中的tag，可索引的字段
+  map<string, double> Fields = 4; // influxdb中的field
+}

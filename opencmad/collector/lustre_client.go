@@ -15,7 +15,7 @@ import (
 )
 
 // 采集客户端的llite下面的stats信息，主要包括当前节点的读写和操作
-func (l *lustreCollector) updateClientState(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateClientState(ch chan<- *transport.CollectData) error {
 	// ● /proc/fs/lustre/osc/ytfs-OST0000-osc-ffff8fb1b06d7000/ost_server_uuid
 	// ● /proc/fs/lustre/mdc/ytfs-MDT0000-mdc-ffff8fb1b06d7000/mds_server_uuid
 	fps, err := filepath.Glob(procFilePath("fs/lustre/*c/*/*_server_uuid"))
@@ -27,7 +27,7 @@ func (l *lustreCollector) updateClientState(ch chan<- *transport.Data) error {
 		return nil
 	}
 	for _, fp := range fps {
-		clientStateData, err := readAll(fp)
+		clientStateData, err := utils.ReadAll(fp)
 		if err != nil {
 			return err
 		}
@@ -40,7 +40,7 @@ func (l *lustreCollector) updateClientState(ch chan<- *transport.Data) error {
 		target := strings.TrimRight(targetUUIDAndstate[0], "_UUID")
 		targetType := l.parseTargetLabel(target)
 		fsname := l.parseLustreTarget(target)
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        utils.Now(),
 			Measurement: "lustre_client_state",
 			Tags: map[string]string{
@@ -65,7 +65,7 @@ type lliteStats struct {
 	fields map[string]float64
 }
 
-func (l *lustreCollector) updateLliteStats(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateLliteStats(ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(filepath.Join(l.llitePath, "*-*/stats"))
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (l *lustreCollector) updateLliteStats(ch chan<- *transport.Data) error {
 			}
 			fields["read_mb_im"] = readBytesNow
 			fields["write_mb_im"] = writeBytesNow
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        int64(rtime),
 				Measurement: "lustre_llite_stats",
 				Tags: map[string]string{

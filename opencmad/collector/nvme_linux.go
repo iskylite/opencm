@@ -38,7 +38,7 @@ func NewNVMeCollector(logger log.Logger, subsystem string) (Collector, error) {
 	}, nil
 }
 
-func (c *nvmeCollector) Update(ch chan<- *transport.Data) error {
+func (c *nvmeCollector) Update(ch chan<- *transport.CollectData) error {
 	rtime := utils.Now()
 	devices, err := c.fs.NVMeClass()
 	if err != nil {
@@ -50,7 +50,7 @@ func (c *nvmeCollector) Update(ch chan<- *transport.Data) error {
 	}
 
 	for _, device := range devices {
-		ch <- &transport.Data{
+		ch <- &transport.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        map[string]string{"dev": device.Name, "state": device.State, "fw": device.FirmwareRevision, "model": device.Model, "serial": device.Serial},

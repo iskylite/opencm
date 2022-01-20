@@ -48,7 +48,7 @@ func NewDiskstatsCollector(logger log.Logger, subsystem string) (Collector, erro
 	}, nil
 }
 
-func (c *diskstatsCollector) Update(ch chan<- *transport.Data) error {
+func (c *diskstatsCollector) Update(ch chan<- *transport.CollectData) error {
 	rtime := utils.Now()
 	diskStats, err := c.fs.ProcDiskstats()
 	if err != nil {

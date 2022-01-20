@@ -49,7 +49,7 @@ func NewCPUCollector(logger log.Logger, subsystem string) (Collector, error) {
 }
 
 // Update implements Collector and exposes cpu related metrics from /proc/stat and /sys/.../cpu/.
-func (c *cpuCollector) Update(ch chan<- *transport.Data) error {
+func (c *cpuCollector) Update(ch chan<- *transport.CollectData) error {
 	if err := c.updateStat(ch); err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (c *cpuCollector) Update(ch chan<- *transport.Data) error {
 }
 
 // updateStat reads /proc/stat through procfs and exports CPU-related metrics.
-func (c *cpuCollector) updateStat(ch chan<- *transport.Data) error {
+func (c *cpuCollector) updateStat(ch chan<- *transport.CollectData) error {
 	rtime := utils.Now()
 	stats, err := c.fs.Stat()
 	if err != nil {

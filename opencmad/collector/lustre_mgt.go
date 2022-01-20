@@ -13,14 +13,14 @@ import (
 	"github.com/iskylite/opencm/transport"
 )
 
-func (l *lustreCollector) updateMGTState(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateMGTState(ch chan<- *transport.CollectData) error {
 	if _, err := l.openProcFile(procFilePath("fs/lustre/mgs/MGS")); err != nil {
 		if err == errLustreNotAvailable {
 			level.Debug(l.logger).Log("err", err)
 			return ErrNoData
 		}
 	}
-	numExports, err := readAll(procFilePath("fs/lustre/mgs/MGS/num_exports"))
+	numExports, err := utils.ReadAll(procFilePath("fs/lustre/mgs/MGS/num_exports"))
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (l *lustreCollector) updateMGTState(ch chan<- *transport.Data) error {
 		}
 
 		err = l.parseMGSLiveFile(file, func(fsname string, state string) {
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_mgt_state",
 				Tags: map[string]string{

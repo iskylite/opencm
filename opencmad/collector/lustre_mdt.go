@@ -12,11 +12,11 @@ import (
 	"github.com/iskylite/opencm/transport"
 )
 
-func (l *lustreCollector) updateMDTState(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateMDTState(ch chan<- *transport.CollectData) error {
 	return l.updateTargetState("mdt", ch)
 }
 
-func (l *lustreCollector) updateMDTStats(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateMDTStats(ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(procFilePath("fs/lustre/mdt/*/md_stats"))
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (l *lustreCollector) updateMDTStats(ch chan<- *transport.Data) error {
 			return err
 		}
 		err = l.parseMDTStatsFile(mdtStatsFile, func(rtime int64, fields map[string]float64) {
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_mdt_stats",
 				Tags: map[string]string{

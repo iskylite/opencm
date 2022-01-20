@@ -10,8 +10,8 @@ import (
 )
 
 // NewCollectorData 生成Data
-func NewCollectorData(rtime int64, measurement string, tags map[string]string, fields map[string]float64) *transport.Data {
-	return &transport.Data{
+func NewCollectorData(rtime int64, measurement string, tags map[string]string, fields map[string]float64) *transport.CollectData {
+	return &transport.CollectData{
 		Time:        rtime,
 		Measurement: measurement,
 		Tags:        tags,
@@ -20,7 +20,7 @@ func NewCollectorData(rtime int64, measurement string, tags map[string]string, f
 }
 
 // FormatCollectorData 格式化Data，输出字符串
-func FormatCollectorData(data *transport.Data, logger log.Logger) {
+func FormatCollectorData(data *transport.CollectData, logger log.Logger) {
 	rtime := strconv.Itoa(int(data.Time))
 	var tags, fields []string
 	for tk, tv := range data.Tags {

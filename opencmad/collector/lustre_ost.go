@@ -13,11 +13,11 @@ import (
 	"github.com/iskylite/opencm/transport"
 )
 
-func (l *lustreCollector) updateOSTState(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateOSTState(ch chan<- *transport.CollectData) error {
 	return l.updateTargetState("obdfilter", ch)
 }
 
-func (l *lustreCollector) updateOSTBRWStats(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateOSTBRWStats(ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(filepath.Join(l.targetSizePath, "osd-*/*OST*/brw_stats"))
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (l *lustreCollector) updateOSTBRWStats(ch chan<- *transport.Data) error {
 			return err
 		}
 		err = l.parseBRWStatsFile(brwStatsFile, func(rtime int64, ioSize string, readIOS, writeIOS float64) {
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_ost_brw_stats",
 				Tags: map[string]string{
@@ -102,7 +102,7 @@ type ostStats struct {
 	fields map[string]float64
 }
 
-func (l *lustreCollector) updateOSTStats(ch chan<- *transport.Data) error {
+func (l *lustreCollector) updateOSTStats(ch chan<- *transport.CollectData) error {
 	fps, err := filepath.Glob(procFilePath("fs/lustre/obdfilter/*/stats"))
 	if err != nil {
 		return err
@@ -157,7 +157,7 @@ func (l *lustreCollector) updateOSTStats(ch chan<- *transport.Data) error {
 			}
 			fields["read_mb_im"] = readBytesNow
 			fields["write_mb_im"] = writeBytesNow
-			ch <- &transport.Data{
+			ch <- &transport.CollectData{
 				Time:        int64(rtime),
 				Measurement: "lustre_ost_stats",
 				Tags: map[string]string{

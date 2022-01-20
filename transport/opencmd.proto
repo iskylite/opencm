@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "transport/generic.proto";
+
+package transport;
+
+option go_package = "transport/";
+
+service OpenCMDService {
+  rpc RegisterOpenCMAD(OpenCMADRegistry) returns (OpenCMADConfig);
+  rpc UnRegisterOpenCMAD(GenericNode) returns (GenericMsg);
+}
+
+// OpenCMADRegistry 注册opencmad服务
+message OpenCMADRegistry {
+  string Host = 1;
+  OS OS = 2;
+  repeated Interface Interfaces = 3;
+}
+
+// OS 系统基本
+message OS {
+  uint64 BootTime = 1;
+  uint64 MemTotal = 2; // G
+  int32 CPUNum = 3;
+  string Arch = 4;
+  string Kernel = 5;
+  string Version = 6;
+  string ImageBuildTime = 7; // .ts
+}
+
+// Interface 网络配置
+message Interface {
+  string Dev = 1;
+  string HardwareAddr = 2;
+  string Flags = 3;
+  string IP = 4;
+  int32 Mask = 5;
+}
+
+// OpenCMADConfig opencmad注册响应数据
+message OpenCMADConfig {
+  int32 CollectorFlags = 1;
+  string NodeType = 2;
+}
