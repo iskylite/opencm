@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/iskylite/opencm/opencmad/collector"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
 // NodeCollectorHandler 初始化nc
@@ -32,8 +32,8 @@ func DefaultNCHandler(s *Server) error {
 }
 
 // Collect 数据采集接口
-func (s *Server) Collect(ctx context.Context, req *transport.CollectRequest) (*transport.CollectResponse, error) {
-	return &transport.CollectResponse{
+func (s *Server) Collect(ctx context.Context, req *pb.CollectRequest) (*pb.CollectResponse, error) {
+	return &pb.CollectResponse{
 		NodeName:     s.host,
 		NodeType:     s.NodeType,
 		PullNodes:    req.PullNodes,

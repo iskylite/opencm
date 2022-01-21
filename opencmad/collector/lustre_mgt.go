@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
-func (l *lustreCollector) updateMGTState(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateMGTState(ch chan<- *pb.CollectData) error {
 	if _, err := l.openProcFile(procFilePath("fs/lustre/mgs/MGS")); err != nil {
 		if err == errLustreNotAvailable {
 			level.Debug(l.logger).Log("err", err)
@@ -50,7 +50,7 @@ func (l *lustreCollector) updateMGTState(ch chan<- *transport.CollectData) error
 		}
 
 		err = l.parseMGSLiveFile(file, func(fsname string, state string) {
-			ch <- &transport.CollectData{
+			ch <- &pb.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_mgt_state",
 				Tags: map[string]string{

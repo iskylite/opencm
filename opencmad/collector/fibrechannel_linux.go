@@ -7,7 +7,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"github.com/iskylite/procfs/sysfs"
 )
 
@@ -72,7 +72,7 @@ func NewFibreChannelCollector(logger log.Logger, subsystem string) (Collector, e
 	return &i, nil
 }
 
-func (c *fibrechannelCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *fibrechannelCollector) Update(ch chan<- *pb.CollectData) error {
 	rtime := utils.Now()
 	hosts, err := c.fs.FibreChannelClass()
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *fibrechannelCollector) Update(ch chan<- *transport.CollectData) error {
 
 		// 错误统计
 		fields := newFibreChannelFields(host)
-		ch <- &transport.CollectData{
+		ch <- &pb.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        tags,

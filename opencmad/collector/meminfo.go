@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
 const (
@@ -29,7 +29,7 @@ func NewMeminfoCollector(logger log.Logger, subsystem string) (Collector, error)
 
 // Update calls (*meminfoCollector).getMemInfo to get the platform specific
 // memory metrics.
-func (c *meminfoCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *meminfoCollector) Update(ch chan<- *pb.CollectData) error {
 	rtime := utils.Now()
 	memInfo, err := c.getMemInfo()
 	if err != nil {
@@ -37,7 +37,7 @@ func (c *meminfoCollector) Update(ch chan<- *transport.CollectData) error {
 	}
 	level.Debug(c.logger).Log("msg", "Set node_mem", "memInfo", memInfo)
 
-	ch <- &transport.CollectData{
+	ch <- &pb.CollectData{
 		Time:        rtime,
 		Measurement: c.subsystem,
 		Tags:        nil,

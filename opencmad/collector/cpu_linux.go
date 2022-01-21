@@ -8,7 +8,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"github.com/iskylite/procfs"
 )
 
@@ -49,7 +49,7 @@ func NewCPUCollector(logger log.Logger, subsystem string) (Collector, error) {
 }
 
 // Update implements Collector and exposes cpu related metrics from /proc/stat and /sys/.../cpu/.
-func (c *cpuCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *cpuCollector) Update(ch chan<- *pb.CollectData) error {
 	if err := c.updateStat(ch); err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (c *cpuCollector) Update(ch chan<- *transport.CollectData) error {
 }
 
 // updateStat reads /proc/stat through procfs and exports CPU-related metrics.
-func (c *cpuCollector) updateStat(ch chan<- *transport.CollectData) error {
+func (c *cpuCollector) updateStat(ch chan<- *pb.CollectData) error {
 	rtime := utils.Now()
 	stats, err := c.fs.Stat()
 	if err != nil {

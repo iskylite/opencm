@@ -1,14 +1,15 @@
 syntax = "proto3";
 
-import "transport/generic.proto";
+package pb;
 
-package transport;
+// option go_package = "github.com/iskylite/opencm/pb/opencmd_pb";
+option go_package = "pb/";
 
-option go_package = "transport/";
+import "pb/generic.proto";
 
 service OpenCMDService {
   rpc RegisterOpenCMAD(OpenCMADRegistry) returns (OpenCMADConfig);
-  rpc UnRegisterOpenCMAD(GenericNode) returns (GenericMsg);
+  rpc UnRegisterOpenCMAD(GenericMsg) returns (GenericMsg);
 }
 
 // OpenCMADRegistry 注册opencmad服务

@@ -1,0 +1,14 @@
+// 通用数据模块
+syntax = "proto3";
+
+package pb;
+
+// option go_package = "github.com/iskylite/opencm/pb/generic_pb";
+option go_package = "pb/";
+
+// GenericMsg 通用消息
+message GenericMsg {
+  string Node = 1;
+  string Flag = 2;
+  string Msg = 3;
+}

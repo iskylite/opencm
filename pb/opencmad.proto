@@ -1,14 +1,15 @@
 syntax = "proto3";
 
-import "transport/generic.proto";
+package pb;
 
-package transport;
+// option go_package = "github.com/iskylite/opencm/pb/opencmad_pb";
+option go_package = "pb/";
 
-option go_package = "transport/";
+import "pb/generic.proto";
 
 service OpenCMADService {
   rpc Collect(CollectRequest) returns (CollectResponse);
-  rpc Ping(GenericNode) returns (GenericMsg);
+  rpc Ping(GenericMsg) returns (GenericMsg);
 }
 
 // Request opencmad数据采集请求数据

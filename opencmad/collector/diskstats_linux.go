@@ -7,7 +7,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"github.com/iskylite/procfs/blockdevice"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -48,7 +48,7 @@ func NewDiskstatsCollector(logger log.Logger, subsystem string) (Collector, erro
 	}, nil
 }
 
-func (c *diskstatsCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *diskstatsCollector) Update(ch chan<- *pb.CollectData) error {
 	rtime := utils.Now()
 	diskStats, err := c.fs.ProcDiskstats()
 	if err != nil {

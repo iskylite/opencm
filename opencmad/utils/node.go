@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"github.com/iskylite/procfs"
 	"golang.org/x/sys/unix"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -18,7 +18,7 @@ var (
 )
 
 // GetOS 获取系统基本配置
-func GetOS() (*transport.OS, error) {
+func GetOS() (*pb.OS, error) {
 	fs, err := procfs.NewFS("/proc")
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func GetOS() (*transport.OS, error) {
 	}
 	ts = BytesToString(tsBytes)
 
-	return &transport.OS{
+	return &pb.OS{
 		BootTime:       stats.BootTime,
 		CPUNum:         int32(len(stats.CPU)),
 		MemTotal:       *memInfo.MemTotal / 1024 / 1024,
@@ -57,7 +57,7 @@ func GetOS() (*transport.OS, error) {
 }
 
 // GetHostname 获取主机名
-func GetHostname(allInterfaces []*transport.Interface) string {
+func GetHostname(allInterfaces []*pb.Interface) string {
 	hostname, err := os.Hostname()
 	if err == nil && hostname != "localhost" {
 		return hostname

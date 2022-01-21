@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"google.golang.org/grpc"
 )
 
-func getRegisterData() (*transport.OpenCMADRegistry, error) {
+func getRegisterData() (*pb.OpenCMADRegistry, error) {
 	interfaces, err := utils.GetInterfaces()
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func getRegisterData() (*transport.OpenCMADRegistry, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &transport.OpenCMADRegistry{
+	return &pb.OpenCMADRegistry{
 		Host:       hostname,
 		OS:         osConfig,
 		Interfaces: interfaces,
@@ -59,7 +59,7 @@ func UnRegisterOpenCMADHandler(s *Server) error {
 	}
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*time.Duration(*clientExecTimeout))
 	defer cancel()
-	msg, err := cli.UnRegisterOpenCMAD(ctx, &transport.GenericNode{Node: s.host})
+	msg, err := cli.UnRegisterOpenCMAD(ctx, &pb.GenericMsg{Node: s.host, Flag: s.serverName, Msg: "UnRegisterOpenCMAD"})
 	if err != nil {
 		return err
 	}
@@ -67,10 +67,10 @@ func UnRegisterOpenCMADHandler(s *Server) error {
 	return nil
 }
 
-func initOpenCMDClient(s *Server, opts ...grpc.DialOption) (transport.OpenCMDServiceClient, error) {
+func initOpenCMDClient(s *Server, opts ...grpc.DialOption) (pb.OpenCMDServiceClient, error) {
 	conn, err := grpc.Dial(s.opencmdServer, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return transport.NewOpenCMDServiceClient(conn), nil
+	return pb.NewOpenCMDServiceClient(conn), nil
 }

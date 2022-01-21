@@ -8,7 +8,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"github.com/iskylite/procfs/sysfs"
 )
 
@@ -38,7 +38,7 @@ func NewNVMeCollector(logger log.Logger, subsystem string) (Collector, error) {
 	}, nil
 }
 
-func (c *nvmeCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *nvmeCollector) Update(ch chan<- *pb.CollectData) error {
 	rtime := utils.Now()
 	devices, err := c.fs.NVMeClass()
 	if err != nil {
@@ -50,7 +50,7 @@ func (c *nvmeCollector) Update(ch chan<- *transport.CollectData) error {
 	}
 
 	for _, device := range devices {
-		ch <- &transport.CollectData{
+		ch <- &pb.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        map[string]string{"dev": device.Name, "state": device.State, "fw": device.FirmwareRevision, "model": device.Model, "serial": device.Serial},

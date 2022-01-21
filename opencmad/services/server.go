@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/iskylite/opencm/opencmad/collector"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"google.golang.org/grpc"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -24,6 +24,7 @@ var (
 
 // Server Grpc服务
 type Server struct {
+	serverName     string
 	listenAddress  string
 	opencmdServer  string
 	host           string
@@ -31,28 +32,33 @@ type Server struct {
 	logger         log.Logger
 	collectorFlags int
 	nodeCollector  *collector.NodeCollector
+	opts           []grpc.ServerOption
 	gs             *grpc.Server
 }
 
+// DefaultServer 默认Server
 func DefaultServer() *Server {
 	return &Server{
+		serverName:    serverName,
 		listenAddress: *listenAddress,
 		opencmdServer: net.JoinHostPort(*opencmdHost, *opencmdPort),
 	}
 }
 
+// Use 配置Server，包括opencmad服务注册
 func (s *Server) Use(handler func(*Server) error) {
 	if err := handler(s); err != nil {
 		panic(err)
 	}
 }
 
+// Serve 启动grpc.Server
 func (s *Server) Serve() error {
 	conn, err := net.Listen("tcp", *listenAddress)
 	if err != nil {
 		return err
 	}
-	s.gs = grpc.NewServer()
-	transport.RegisterOpenCMADServiceServer(s.gs, s)
+	s.gs = grpc.NewServer(s.opts...)
+	pb.RegisterOpenCMADServiceServer(s.gs, s)
 	return s.gs.Serve(conn)
 }

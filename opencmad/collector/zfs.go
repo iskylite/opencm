@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
 const zfsFlag = 1 << 10
@@ -53,7 +53,7 @@ func NewZFSCollector(logger log.Logger, subsystem string) (Collector, error) {
 	}, nil
 }
 
-func (c *zfsCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *zfsCollector) Update(ch chan<- *pb.CollectData) error {
 
 	if _, err := c.openProcFile(c.linuxProcpathBase); err != nil {
 		if err == errZFSNotAvailable {
@@ -77,7 +77,7 @@ func (c *zfsCollector) Update(ch chan<- *transport.CollectData) error {
 	return c.updatePoolStats(ch)
 }
 
-// func (c *zfsCollector) constSysctlMetric(subsystem string, sysctl zfsSysctl, value uint64) *transport.CollectData {
+// func (c *zfsCollector) constSysctlMetric(subsystem string, sysctl zfsSysctl, value uint64) *pb.CollectData {
 // 	metricName := sysctl.metricName()
 
 // 	return prometheus.MustNewConstMetric(
@@ -92,8 +92,8 @@ func (c *zfsCollector) Update(ch chan<- *transport.CollectData) error {
 // 	)
 // }
 
-func (c *zfsCollector) constPoolMetric(rtime int64, poolName string, io map[string]float64) *transport.CollectData {
-	return &transport.CollectData{
+func (c *zfsCollector) constPoolMetric(rtime int64, poolName string, io map[string]float64) *pb.CollectData {
+	return &pb.CollectData{
 		Time:        rtime,
 		Measurement: c.subsystem + "_io",
 		Tags: map[string]string{
@@ -103,7 +103,7 @@ func (c *zfsCollector) constPoolMetric(rtime int64, poolName string, io map[stri
 	}
 }
 
-// func (c *zfsCollector) constPoolObjsetMetric(poolName string, datasetName string, sysctl zfsSysctl, value uint64) *transport.CollectData {
+// func (c *zfsCollector) constPoolObjsetMetric(poolName string, datasetName string, sysctl zfsSysctl, value uint64) *pb.CollectData {
 // 	metricName := sysctl.metricName()
 
 // 	return prometheus.MustNewConstMetric(
@@ -120,8 +120,8 @@ func (c *zfsCollector) constPoolMetric(rtime int64, poolName string, io map[stri
 // 	)
 // }
 
-func (c *zfsCollector) constPoolStateMetric(rtime int64, poolName string, stateName string) *transport.CollectData {
-	return &transport.CollectData{
+func (c *zfsCollector) constPoolStateMetric(rtime int64, poolName string, stateName string) *pb.CollectData {
+	return &pb.CollectData{
 		Time:        rtime,
 		Measurement: c.subsystem + "_state",
 		Tags: map[string]string{

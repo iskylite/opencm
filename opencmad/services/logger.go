@@ -8,6 +8,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
+// DefaultLoggerHandler 默认日志配置
 func DefaultLoggerHandler(s *Server) error {
 	promlogConfig := &promlog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)

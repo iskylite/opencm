@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,7 +18,7 @@ import (
 const UnknownTargetType = "UNKNOWN"
 
 // updateTargetState targetType即为lustre存储目标类型，这里用于指定实际目录，即mdt、obdfilter
-func (l *lustreCollector) updateTargetState(targetType string, ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateTargetState(targetType string, ch chan<- *pb.CollectData) error {
 	fps, err := filepath.Glob(procFilePath(filepath.Join("fs/lustre", targetType, "*")))
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (l *lustreCollector) updateTargetState(targetType string, ch chan<- *transp
 			tags["label"] = filepath.Base(fp)
 			// tags["num_exports"] = strings.TrimSpace(string(numExports))
 
-			ch <- &transport.CollectData{
+			ch <- &pb.CollectData{
 				Time:        utils.Now(),
 				Measurement: "lustre_target_state",
 				Tags:        tags,
@@ -102,7 +102,7 @@ func (l *lustreCollector) parseRecoveryStatus(reader io.Reader, handler func(map
 }
 
 // lustre 存储目标卷数据采集
-func (l *lustreCollector) updateTargetSize(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateTargetSize(ch chan<- *pb.CollectData) error {
 	fps, err := filepath.Glob(filepath.Join(l.targetSizePath, "osd-*/*/mntdev"))
 	if err != nil {
 		return err
@@ -149,7 +149,7 @@ func (l *lustreCollector) updateTargetSize(ch chan<- *transport.CollectData) err
 			}
 			fields[fKey] = float64(fdataint64)
 		}
-		ch <- &transport.CollectData{
+		ch <- &pb.CollectData{
 			Time:        utils.Now(),
 			Measurement: "lustre_target_size",
 			Tags:        tags,
@@ -167,7 +167,7 @@ func (l *lustreCollector) parseTargetLabel(label string) string {
 }
 
 // lustre job_stats采集
-func (l *lustreCollector) updateTargetJobStats(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateTargetJobStats(ch chan<- *pb.CollectData) error {
 	fps, err := filepath.Glob(procFilePath("fs/lustre/*/*/job_stats"))
 	if err != nil {
 		return err
@@ -195,7 +195,7 @@ func (l *lustreCollector) updateTargetJobStats(ch chan<- *transport.CollectData)
 			return err
 		}
 		err = l.parseJobStatsData(jobStatsData["job_stats"], func(rtime int64, jobID string, fields map[string]float64) {
-			ch <- &transport.CollectData{
+			ch <- &pb.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_" + strings.ToLower(targetType) + "_job_stats",
 				Tags: map[string]string{
@@ -264,7 +264,7 @@ func (l *lustreCollector) parseJobStatsData(jobStatsData []map[string]interface{
 }
 
 // lustre配额信息采集
-func (l *lustreCollector) updateTargetQuotaSlave(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateTargetQuotaSlave(ch chan<- *pb.CollectData) error {
 	fps, err := filepath.Glob(procFilePath("fs/lustre/*/*/quota_slave/acct_*"))
 	if err != nil {
 		return err
@@ -305,7 +305,7 @@ func (l *lustreCollector) updateTargetQuotaSlave(ch chan<- *transport.CollectDat
 			return err
 		}
 		err = l.parseQuotaSlaveData(quotaSlaveData[yamlGroup], func(id string, fields map[string]float64) {
-			ch <- &transport.CollectData{
+			ch <- &pb.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_" + acctFileName,
 				Tags: map[string]string{

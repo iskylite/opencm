@@ -10,7 +10,7 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/common"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"github.com/iskylite/procfs/sysfs"
 )
 
@@ -40,7 +40,7 @@ func NewInfiniBandCollector(logger log.Logger, subsystem string) (Collector, err
 	return &i, nil
 }
 
-func (c *infinibandCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *infinibandCollector) Update(ch chan<- *pb.CollectData) error {
 	rtime := utils.Now()
 	devices, err := c.fs.InfiniBandClass()
 	if err != nil {
@@ -54,7 +54,7 @@ func (c *infinibandCollector) Update(ch chan<- *transport.CollectData) error {
 	for _, device := range devices {
 		for _, port := range device.Ports {
 			portStr := strconv.FormatUint(uint64(port.Port), 10)
-			ch <- &transport.CollectData{
+			ch <- &pb.CollectData{
 				Time:        rtime,
 				Measurement: c.subsystem,
 				Tags: map[string]string{

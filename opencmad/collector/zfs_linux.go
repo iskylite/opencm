@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
 // constants from https://github.com/zfsonlinux/zfs/blob/master/lib/libspl/include/sys/kstat.h
@@ -41,7 +41,7 @@ func (c *zfsCollector) openProcFile(path string) (*os.File, error) {
 	return file, nil
 }
 
-// func (c *zfsCollector) updateZfsStats(subsystem string, ch chan<- *transport.CollectData) error {
+// func (c *zfsCollector) updateZfsStats(subsystem string, ch chan<- *pb.CollectData) error {
 // 	file, err := c.openProcFile(filepath.Join(c.linuxProcpathBase, c.linuxPathMap[subsystem]))
 // 	if err != nil {
 // 		return err
@@ -53,7 +53,7 @@ func (c *zfsCollector) openProcFile(path string) (*os.File, error) {
 // 	})
 // }
 
-func (c *zfsCollector) updatePoolStats(ch chan<- *transport.CollectData) error {
+func (c *zfsCollector) updatePoolStats(ch chan<- *pb.CollectData) error {
 	// IO 统计
 	zpoolPaths, err := filepath.Glob(procFilePath(filepath.Join(c.linuxProcpathBase, c.linuxZpoolIoPath)))
 	if err != nil {

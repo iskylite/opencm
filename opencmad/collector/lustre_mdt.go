@@ -9,14 +9,14 @@ import (
 	"strings"
 
 	"github.com/go-kit/log/level"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
-func (l *lustreCollector) updateMDTState(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateMDTState(ch chan<- *pb.CollectData) error {
 	return l.updateTargetState("mdt", ch)
 }
 
-func (l *lustreCollector) updateMDTStats(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateMDTStats(ch chan<- *pb.CollectData) error {
 	fps, err := filepath.Glob(procFilePath("fs/lustre/mdt/*/md_stats"))
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (l *lustreCollector) updateMDTStats(ch chan<- *transport.CollectData) error
 			return err
 		}
 		err = l.parseMDTStatsFile(mdtStatsFile, func(rtime int64, fields map[string]float64) {
-			ch <- &transport.CollectData{
+			ch <- &pb.CollectData{
 				Time:        rtime,
 				Measurement: "lustre_mdt_stats",
 				Tags: map[string]string{

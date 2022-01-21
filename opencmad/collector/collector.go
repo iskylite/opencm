@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
 // Namespace defines the common namespace to be used by all metrics.
@@ -67,7 +67,7 @@ func NewNodeCollector(logger log.Logger, flags uint) (*NodeCollector, error) {
 }
 
 // Collect implements the prometheus.Collector interface.
-func (n NodeCollector) Collect(ch chan<- *transport.CollectData) {
+func (n NodeCollector) Collect(ch chan<- *pb.CollectData) {
 	defer close(ch)
 	wg := sync.WaitGroup{}
 	wg.Add(len(n.Collectors))
@@ -80,7 +80,7 @@ func (n NodeCollector) Collect(ch chan<- *transport.CollectData) {
 	wg.Wait()
 }
 
-func execute(name string, c Collector, ch chan<- *transport.CollectData, logger log.Logger) {
+func execute(name string, c Collector, ch chan<- *pb.CollectData, logger log.Logger) {
 	begin := time.Now()
 	err := c.Update(ch)
 	duration := time.Since(begin)
@@ -97,9 +97,9 @@ func execute(name string, c Collector, ch chan<- *transport.CollectData, logger 
 }
 
 // Gather 获取数据，生成响应
-func (n NodeCollector) Gather() []*transport.CollectData {
-	ch := make(chan *transport.CollectData, runtime.NumCPU())
-	datas := make([]*transport.CollectData, 0, len(n.Collectors))
+func (n NodeCollector) Gather() []*pb.CollectData {
+	ch := make(chan *pb.CollectData, runtime.NumCPU())
+	datas := make([]*pb.CollectData, 0, len(n.Collectors))
 	go n.Collect(ch)
 	for data := range ch {
 		datas = append(datas, data)
@@ -110,7 +110,7 @@ func (n NodeCollector) Gather() []*transport.CollectData {
 // Collector is the interface a collector has to implement.
 type Collector interface {
 	// Get new metrics and expose them via prometheus registry.
-	Update(ch chan<- *transport.CollectData) error
+	Update(ch chan<- *pb.CollectData) error
 }
 
 // ErrNoData indicates the collector found no data to collect, but had no other error.

@@ -3,12 +3,12 @@ package utils
 import (
 	"net"
 
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 )
 
 // GetInterfaces 获取所有可用得网络配置
-func GetInterfaces() ([]*transport.Interface, error) {
-	interfaces := make([]*transport.Interface, 0)
+func GetInterfaces() ([]*pb.Interface, error) {
+	interfaces := make([]*pb.Interface, 0)
 	allInterfaces, err := net.Interfaces()
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func GetInterfaces() ([]*transport.Interface, error) {
 				continue
 			}
 			ones, _ := ip.DefaultMask().Size()
-			interfaces = append(interfaces, &transport.Interface{
+			interfaces = append(interfaces, &pb.Interface{
 				Dev:          val.Name,
 				HardwareAddr: val.HardwareAddr.String(),
 				Flags:        val.Flags.String(),

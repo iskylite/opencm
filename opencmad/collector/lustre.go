@@ -13,7 +13,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -62,7 +62,7 @@ func NewLustreCollector(logger log.Logger, subsystem string) (Collector, error) 
 	}, nil
 }
 
-func (l *lustreCollector) Update(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) Update(ch chan<- *pb.CollectData) error {
 	if _, err := l.openProcFile(l.healthCheckPath); err != nil {
 		if err == errLustreNotAvailable {
 			level.Debug(l.logger).Log("err", err)
@@ -71,7 +71,7 @@ func (l *lustreCollector) Update(ch chan<- *transport.CollectData) error {
 	}
 	// updateLliteStats、updateOSTStats、updateLnetStats 采集0.5s内的数据并做处理，近似瞬时值
 	// updateTargetJobStats 暂时不做修改
-	updateFuncs := []func(chan<- *transport.CollectData) error{
+	updateFuncs := []func(chan<- *pb.CollectData) error{
 		l.updateLustreHealth,
 		l.updateMGTState,
 		l.updateMDTState,
@@ -91,7 +91,7 @@ func (l *lustreCollector) Update(ch chan<- *transport.CollectData) error {
 	var wg sync.WaitGroup
 	wg.Add(len(updateFuncs))
 	for _, updateFunc := range updateFuncs {
-		go func(updateFunc func(chan<- *transport.CollectData) error) {
+		go func(updateFunc func(chan<- *pb.CollectData) error) {
 			if err := updateFunc(ch); err != nil {
 				level.Debug(l.logger).Log("msg", err, "subcollector", runtime.FuncForPC(reflect.ValueOf(updateFunc).Pointer()).Name())
 			}
@@ -112,7 +112,7 @@ func (l *lustreCollector) openProcFile(path string) (*os.File, error) {
 	return file, nil
 }
 
-func (l *lustreCollector) updateLustreHealth(ch chan<- *transport.CollectData) error {
+func (l *lustreCollector) updateLustreHealth(ch chan<- *pb.CollectData) error {
 	healthCheck, err := utils.ReadAll(filepath.Join(l.healthCheckPath, "health_check"))
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (l *lustreCollector) updateLustreHealth(ch chan<- *transport.CollectData) e
 		}
 		fields[key] = float64(fdata)
 	}
-	ch <- &transport.CollectData{
+	ch <- &pb.CollectData{
 		Time:        utils.Now(),
 		Measurement: "lustre_health",
 		Tags:        tags,

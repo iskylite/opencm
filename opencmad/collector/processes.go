@@ -12,7 +12,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"github.com/iskylite/procfs"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -73,13 +73,13 @@ func NewProcessStatCollector(logger log.Logger, subsystem string) (Collector, er
 		logger:                   logger,
 	}, nil
 }
-func (c *processCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *processCollector) Update(ch chan<- *pb.CollectData) error {
 	slurmstepdProcStats, allProcessesStats, rtime, err := c.getAllProcs()
 	if err != nil {
 		return err
 	}
 	err = c.parseProcesses(slurmstepdProcStats, allProcessesStats, func(stat *procStat, jobid string) {
-		ch <- &transport.CollectData{
+		ch <- &pb.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        stat.tags(),

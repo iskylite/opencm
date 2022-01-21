@@ -11,7 +11,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -60,7 +60,7 @@ func NewSystemdCollector(logger log.Logger, subsystem string) (Collector, error)
 
 // Update gathers metrics from systemd.  Dbus collection is done in parallel
 // to reduce wait time for responses.
-func (c *systemdCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *systemdCollector) Update(ch chan<- *pb.CollectData) error {
 	begin := time.Now()
 	rtime := utils.Now()
 	conn, err := newSystemdDbusConn()
@@ -92,7 +92,7 @@ func (c *systemdCollector) Update(ch chan<- *transport.CollectData) error {
 	return err
 }
 
-func (c *systemdCollector) collectUnitStatusMetrics(conn *dbus.Conn, ch chan<- *transport.CollectData, units []unit, rtime int64) {
+func (c *systemdCollector) collectUnitStatusMetrics(conn *dbus.Conn, ch chan<- *pb.CollectData, units []unit, rtime int64) {
 	for _, unit := range units {
 		serviceType := ""
 		if strings.HasSuffix(unit.Name, ".service") {
@@ -103,7 +103,7 @@ func (c *systemdCollector) collectUnitStatusMetrics(conn *dbus.Conn, ch chan<- *
 				serviceType = serviceTypeProperty.Value.Value().(string)
 			}
 		}
-		ch <- &transport.CollectData{
+		ch <- &pb.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        map[string]string{"name": unit.Name, "state": unit.ActiveState, "service_type": serviceType},

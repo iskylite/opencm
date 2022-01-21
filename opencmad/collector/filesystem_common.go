@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/iskylite/opencm/opencmad/utils"
-	"github.com/iskylite/opencm/transport"
+	"github.com/iskylite/opencm/pb"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -76,7 +76,7 @@ func NewFilesystemCollector(logger log.Logger, subsystem string) (Collector, err
 	}, nil
 }
 
-func (c *filesystemCollector) Update(ch chan<- *transport.CollectData) error {
+func (c *filesystemCollector) Update(ch chan<- *pb.CollectData) error {
 	rtime := utils.Now()
 	stats, err := c.GetStats()
 	if err != nil {
@@ -108,7 +108,7 @@ func (c *filesystemCollector) Update(ch chan<- *transport.CollectData) error {
 			fields["files_percent"] = (s.files - s.filesFree) / s.files
 			fields["ro"] = s.ro
 		}
-		ch <- &transport.CollectData{
+		ch <- &pb.CollectData{
 			Time:        rtime,
 			Measurement: c.subsystem,
 			Tags:        tags,
